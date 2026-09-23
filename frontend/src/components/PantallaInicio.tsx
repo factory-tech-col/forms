@@ -73,9 +73,8 @@ export default function PantallaInicio({
             entorno de demostración con fines ilustrativos y de análisis
             técnico. Los datos han sido simulados o anonimizados únicamente
             para evaluar la arquitectura, el flujo de trabajo y el desempeño
-            del sistema. Nada de lo aquí mostrado proviene de, ni representa a,
-            la Agencia Nacional de Seguridad Vial (ANSV) ni a ninguna entidad
-            u organización real.
+            del sistema. Nada de lo aquí mostrado proviene de, ni representa a, ninguna
+            entidad pública ni organización real.
           </p>
           <p className="mt-2 flex items-center gap-1.5 text-sky-700">
             <ShieldCheck className="h-3.5 w-3.5" />

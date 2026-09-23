@@ -66,6 +66,24 @@ export async function getMunicipiosByDepartamento(
   return (data ?? []) as Ubicacion[];
 }
 
+export async function getAniosDisponibles(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("sesiones_asistencia")
+    .select("fecha")
+    .not("fecha", "is", null)
+    .order("fecha")
+    .range(0, 9999);
+
+  if (error) throw assertError(error, "consultar años disponibles");
+
+  const anios = new Set<string>();
+  for (const fila of data ?? []) {
+    const anio = String(fila.fecha).slice(0, 4);
+    if (/^\d{4}$/.test(anio)) anios.add(anio);
+  }
+  return Array.from(anios).sort((a, b) => b.localeCompare(a, "es"));
+}
+
 export async function getProyectosOfertas(): Promise<ProyectoOferta[]> {
   const { data, error } = await supabase
     .from("proyectos_ofertas")
@@ -371,6 +389,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
 }
 
 export interface FiltrosDashboard {
+  anio?: string;
   municipios?: number[];
   ofertas?: number[];
   genero?: string;

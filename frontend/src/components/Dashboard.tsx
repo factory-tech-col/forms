@@ -22,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import {
+  getAniosDisponibles,
   getDashboardFiltrado,
   getDepartamentos,
   getOpcionesCategoria,
@@ -60,6 +61,7 @@ const COLUMNAS_CARGA: { columna: string; tabla: TablaCatalogo }[] = [
 ];
 
 interface FiltrosDashboardState {
+  anio: string;
   departamentos: string[];
   municipios: number[];
   idOferta: number | null;
@@ -74,6 +76,7 @@ interface FiltrosDashboardState {
 }
 
 const FILTROS_VACIO: FiltrosDashboardState = {
+  anio: "",
   departamentos: [],
   municipios: [],
   idOferta: null,
@@ -89,6 +92,7 @@ const FILTROS_VACIO: FiltrosDashboardState = {
 
 function aPayload(d: FiltrosDashboardState): FiltrosDashboard {
   return {
+    anio: d.anio || undefined,
     municipios: d.municipios.length > 0 ? d.municipios : undefined,
     ofertas: d.idOferta != null ? [d.idOferta] : undefined,
     genero: d.genero || undefined,
@@ -105,6 +109,7 @@ function aPayload(d: FiltrosDashboardState): FiltrosDashboard {
 function conteoActivos(d: FiltrosDashboardState): number {
   let n = d.departamentos.length + d.municipios.length;
   if (d.idOferta != null) n += 1;
+  if (d.anio) n += 1;
   for (const v of [
     d.genero,
     d.rangoEdad,
@@ -135,6 +140,7 @@ export default function Dashboard() {
   const [departamentos, setDepartamentos] = useState<string[]>([]);
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
   const [ofertas, setOfertas] = useState<ProyectoOferta[]>([]);
+  const [anios, setAnios] = useState<string[]>([]);
   const [opciones, setOpciones] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
@@ -145,6 +151,7 @@ export default function Dashboard() {
           getDepartamentos(),
           getUbicaciones(),
           getProyectosOfertas(),
+          getAniosDisponibles(),
           Promise.all(
             COLUMNAS_CARGA.map(async ({ columna, tabla }) => [
               columna,
@@ -156,7 +163,8 @@ export default function Dashboard() {
         setDepartamentos(entradas[0]);
         setUbicaciones(entradas[1]);
         setOfertas(entradas[2]);
-        setOpciones(Object.fromEntries(entradas[3]));
+        setAnios(entradas[3]);
+        setOpciones(Object.fromEntries(entradas[4]));
 
         const inicial = await getDashboardFiltrado(aPayload(FILTROS_VACIO));
         if (activo) {
@@ -231,6 +239,7 @@ export default function Dashboard() {
 
   const resumenFiltros = useMemo(() => {
     const partes: string[] = [];
+    if (aplicados.anio) partes.push(`Año: ${aplicados.anio}`);
     if (aplicados.departamentos.length > 0) {
       partes.push(aplicados.departamentos.join(", "));
     }
@@ -294,6 +303,15 @@ export default function Dashboard() {
                 Limpiar
               </button>
             </div>
+
+            <SeccionFiltros titulo="Período">
+              <SelectFiltro
+                etiqueta="Año"
+                valor={draft.anio}
+                opciones={anios}
+                onChange={(v) => setDraft((prev) => ({ ...prev, anio: v }))}
+              />
+            </SeccionFiltros>
 
             <SeccionFiltros titulo="Ubicación">
               <MultiSelectBusqueda
